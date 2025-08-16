@@ -1,35 +1,40 @@
 class Solution(object):
     def minWindow(self, s, t):
+        """
+        :type s: str
+        :type t: str
+        :rtype: str
+        """
         if not s or not t:
             return ""
 
-        need = {}
-        for ch in t:
-            need[ch] = need.get(ch, 0) + 1
+        t_count = Counter(t)
+        required = len(t_count)  
+        left, right = 0, 0
+        formed = 0  
+        window_count = {}
 
-        have = {}
-        need_count = len(t)
-        left = 0
-        result = ""
-        min_len = float("inf")
+        ans = float("inf"), None, None
 
-        for right in range(len(s)):
-            ch = s[right]
-            have[ch] = have.get(ch, 0) + 1
+        while right < len(s):
+            char = s[right]
+            window_count[char] = window_count.get(char, 0) + 1
 
-            if ch in need and have[ch] <= need[ch]:
-                need_count -= 1
+            if char in t_count and window_count[char] == t_count[char]:
+                formed += 1
 
-            while need_count == 0:
-                window_len = right - left + 1
-                if window_len < min_len:
-                    min_len = window_len
-                    result = s[left:right+1]
+            while left <= right and formed == required:
+                char = s[left]
 
-                left_char = s[left]
-                have[left_char] -= 1
-                if left_char in need and have[left_char] < need[left_char]:
-                    need_count += 1
+                if right - left + 1 < ans[0]:
+                    ans = (right - left + 1, left, right)
+
+                window_count[char] -= 1
+                if char in t_count and window_count[char] < t_count[char]:
+                    formed -= 1
+
                 left += 1
 
-        return result
+            right += 1
+
+        return "" if ans[0] == float("inf") else s[ans[1]: ans[2] + 1]
